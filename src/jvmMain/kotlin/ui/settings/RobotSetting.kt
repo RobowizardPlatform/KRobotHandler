@@ -1,28 +1,45 @@
 package ui.settings
 
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import robot.RRobot
 
 @Composable
 fun RobotSetting(
-    RRobot: RRobot,
+    robot: RRobot,
 ) {
     SettingSurface(
         header = "Robot settings",
     ) {
+        val status = robot.connectStatus.collectAsState()
+
+        val ip = remember { mutableStateOf("localhost") }
+        OutlinedTextField(
+            value = ip.value,
+            onValueChange = {
+                ip.value = it
+            },
+            label = {
+                Text("Enter IP")
+            }
+        )
         // Connect/Disconnect
-        val text = if (!RRobot.isConnect.value) "Connect" else "DisConnect"
+        val text = if (!status.value) "Connect" else "DisConnect"
         val onClick = {
-            if (!RRobot.isConnect.value) {
-                RRobot.connect()
+            if (!status.value) {
+                robot.connect(ip.value)
             } else {
-                RRobot.disconnect()
+                robot.disconnect()
             }
         }
         SettingLine("Connect to the robot", text, onClick)
 
         // Add points
-        SettingLine("Remember first limit point", "Remember") { RRobot.rememberPoint("firstLimitPoint") }
-        SettingLine("Remember second limit point", "Remember") { RRobot.rememberPoint("secLimitPoint") }
+        SettingLine("Remember first limit point", "Remember") { robot.rememberPoint("firstLimitPoint") }
+        SettingLine("Remember second limit point", "Remember") { robot.rememberPoint("secLimitPoint") }
     }
 }

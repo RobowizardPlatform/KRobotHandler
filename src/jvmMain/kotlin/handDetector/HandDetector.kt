@@ -1,19 +1,41 @@
 package handDetector
 
 import client.Client
+import client.ClientsContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class HandDetector(
     private val coroutineScope: CoroutineScope,
-    private val client: Client
+    private val clientsContext: ClientsContext
 ) {
-    val isConnect = client.isConnect
+    lateinit var client: Client
+    private val _connectStatus = MutableStateFlow(false)
+    val connectStatus: StateFlow<Boolean> = _connectStatus
+    private fun connectStatusCollect() {
+        coroutineScope.launch {
+            if (::client.isInitialized) {
+                client.isConnect.collect {
+                    if (_connectStatus.value && !it) {
+                        _connectStatus.value = false
+                        this.cancel()
+                    }
+                    _connectStatus.value = it
+                }
+            }
+        }
+    }
 
     fun connect() {
+        clientsContext.addClient("test2", "localhost", 9105)
+        client = clientsContext.getClient("test2")
         client.connect()
+        connectStatusCollect()
     }
 
     fun disconnect() {

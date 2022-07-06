@@ -1,6 +1,7 @@
 package ui.settings
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import handDetector.HandDetector
 
 @Composable
@@ -10,10 +11,16 @@ fun HandDetectorSetting(
     SettingSurface(
         header = "Hand detector settings",
     ) {
+        val status = handDetector.connectStatus.collectAsState()
         // Connect/Disconnect
-        val text = if (!handDetector.isConnect.value) "Connect" else "DisConnect"
+        val text = if (!status.value) {
+            "Connect"
+        } else {
+            "DisConnect"
+        }
+
         val onClick = {
-            if (!handDetector.isConnect.value) {
+            if (!status.value) {
                 handDetector.connect()
             } else {
                 handDetector.disconnect()

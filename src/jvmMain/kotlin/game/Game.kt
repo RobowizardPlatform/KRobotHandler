@@ -1,6 +1,5 @@
 package game
 
-import client.Client
 import entity.Buffer
 import handDetector.HandDetector
 import kotlinx.coroutines.CoroutineScope
@@ -21,7 +20,7 @@ class Game(
     val isGame: StateFlow<Boolean> = _isGame
 
     private val buffer = Buffer(5)
-    fun startGame(client: Client) {
+    fun startGame() {
         coroutineScope.launch {
             _isGame.value = true
             robot.signal(gameSignal, true)
@@ -30,26 +29,23 @@ class Game(
             delay(1500L)
 
 //            trackHandDetector()
-            sendBuffer(client)
+            sendBuffer()
         }
     }
 
-    fun sendBuffer(client: Client) {
+    fun sendBuffer() {
         coroutineScope.launch(Dispatchers.IO) {
             while (_isGame.value) {
-//                val str = "1,1,1,1,1,1,1\n"
-//                robotClient.sendCommand(str)
-////                robot.setPoint(buffer.getMiddle())
-                if (client.isConnect.value) {
+                if (robot.connectStatus.value) {
                     for (x in 0..100) {
                         for (y in 0..100) {
                             for (z in 0..100) {
                                 val command =
                                     "${x.toFloat() / 100.0},${y.toFloat() / 100.0},${z.toFloat() / 100.0},0,0,0,0\n"
-                                client.send(command)
-                                println("${client.isConnect.value}: $command")
-                                delay(15L)
-                                if (!client.isConnect.value) {
+                                robot.send(command)
+                                println("${robot.connectStatus.value}: $command")
+                                delay(30L)
+                                if (!robot.connectStatus.value) {
                                     return@launch
                                 }
                             }
