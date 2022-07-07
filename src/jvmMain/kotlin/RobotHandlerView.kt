@@ -1,8 +1,11 @@
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import client.ClientsContext
 import game.Game
 import handDetector.HandDetector
@@ -22,28 +25,32 @@ fun RobotHandlerView(robotsContext: RobotsContext, clientsContext: ClientsContex
 
     val screen = remember { mutableStateOf(Screens.GAME) }
     MaterialTheme {
-        when (screen.value) {
-            Screens.GAME -> {
-                GameScreen(
-                    onOpenSettings = {
-                        screen.value = Screens.SETTINGS
-                    },
-                    onStartGame = {
-                        game.startGame()
-                    },
-                    onStopGame = {
-                        game.stopGame()
-                    }
-                )
-            }
-            Screens.SETTINGS -> {
-                SettingScreen(
-                    onBack = {
-                        screen.value = Screens.GAME
-                    },
-                    handDetector = handDetector,
-                    RRobot = RRobot,
-                )
+        Box(Modifier.fillMaxSize()) {
+            when (screen.value) {
+                Screens.GAME -> {
+                    GameScreen(
+                        modifier = Modifier.fillMaxSize(),
+                        onOpenSettings = {
+                            screen.value = Screens.SETTINGS
+                        },
+                        onStartGame = {
+                            game.startGame()
+                        },
+                        onStopGame = {
+                            game.stopGame()
+                        },
+                        gameState = game.isGame
+                    )
+                }
+                Screens.SETTINGS -> {
+                    SettingScreen(
+                        onBack = {
+                            screen.value = Screens.GAME
+                        },
+                        handDetector = handDetector,
+                        RRobot = RRobot,
+                    )
+                }
             }
         }
     }

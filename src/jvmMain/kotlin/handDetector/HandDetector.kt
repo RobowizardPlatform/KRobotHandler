@@ -31,10 +31,15 @@ class HandDetector(
         }
     }
 
-    fun connect() {
-        clientsContext.addClient("test2", "localhost", 9105)
+    fun connect(ip: String, port: String) {
+        val handName = "test2"
+        if (!clientsContext.getClientsName().contains(handName)) {
+            clientsContext.addClient("test2", ip, port.trim().toInt())
+        }
         client = clientsContext.getClient("test2")
-        client.connect()
+        if (!client.isConnect.value) {
+            client.connect()
+        }
         connectStatusCollect()
     }
 

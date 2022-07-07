@@ -17,7 +17,7 @@ fun RobotSetting(
     ) {
         val status = robot.connectStatus.collectAsState()
 
-        val ip = remember { mutableStateOf("localhost") }
+        val ip = remember { mutableStateOf("192.168.0.2") }
         OutlinedTextField(
             value = ip.value,
             onValueChange = {
@@ -27,6 +27,7 @@ fun RobotSetting(
                 Text("Enter IP")
             }
         )
+
         // Connect/Disconnect
         val text = if (!status.value) "Connect" else "DisConnect"
         val onClick = {

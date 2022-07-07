@@ -1,8 +1,10 @@
 package ui.settings
 
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.Button
-import androidx.compose.material.Text
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import handDetector.HandDetector
 import robot.RRobot
@@ -15,10 +17,10 @@ fun SettingScreen(
 ) {
     LazyColumn {
         item {
-            Button(
+            IconButton(
                 onClick = onBack
             ) {
-                Text("Back")
+                Icon(Icons.Default.ArrowBack, "Back")
             }
         }
         item {

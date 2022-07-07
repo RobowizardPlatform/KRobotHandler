@@ -3,8 +3,8 @@ package converter
 import entity.Point
 
 fun convertHandDetectorValueToRobot(handDetectorValue: String): Point? {
-    val handDetectorSplit = handDetectorValue.split(" ")
     return if (handDetectorValue.isNotEmpty() && !handDetectorValue.contains("START")) {
+        val handDetectorSplit = handDetectorValue.split(";")
         Point(
             handDetectorSplit[0],
             handDetectorSplit[1],

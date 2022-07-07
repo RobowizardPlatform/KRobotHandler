@@ -19,16 +19,19 @@ class Game(
     private val _isGame = MutableStateFlow(false)
     val isGame: StateFlow<Boolean> = _isGame
 
-    private val buffer = Buffer(5)
+    private val buffer = Buffer(10)
     fun startGame() {
+        buffer.clear()
+        _isGame.value = true
+
         coroutineScope.launch {
-            _isGame.value = true
             robot.signal(gameSignal, true)
             delay(10L)
             robot.startProgram("moveByHand")
             delay(1500L)
 
-//            trackHandDetector()
+            trackHandDetector()
+//            trackData()
             sendBuffer()
         }
     }
@@ -36,30 +39,52 @@ class Game(
     fun sendBuffer() {
         coroutineScope.launch(Dispatchers.IO) {
             while (_isGame.value) {
-                if (robot.connectStatus.value) {
-                    for (x in 0..100) {
-                        for (y in 0..100) {
-                            for (z in 0..100) {
-                                val command =
-                                    "${x.toFloat() / 100.0},${y.toFloat() / 100.0},${z.toFloat() / 100.0},0,0,0,0\n"
-                                robot.send(command)
-                                println("${robot.connectStatus.value}: $command")
-                                delay(30L)
-                                if (!robot.connectStatus.value) {
-                                    return@launch
-                                }
-                            }
-                        }
-                    }
+                val message = buffer.getMiddle()
+                if (message != null) {
+                    println(message)
+                    robot.send("$message\n")
                 }
+                delay(10L)
             }
+//            else {
+//                    stopGame()
+//                }
+//            }
         }
     }
 
     fun trackHandDetector() {
         coroutineScope.launch {
             handDetector.startFlow {
-                buffer.add(it)
+//                if (!it.contains("START")) {
+//                    val values = it.split(";").map { it.trim().toFloat() }
+//                    var message = ""
+//                    values.forEach {
+//                        message += "${(it + 1.0) / 2.0},"
+//                    }
+//                    buffer.add("$message,")
+//                }
+                if (!it.contains("START")) {
+                    buffer.add(it)
+                }
+            }
+        }
+    }
+
+    private fun trackData() {
+        coroutineScope.launch {
+            for (x in 0..100) {
+                for (y in 0..100) {
+                    for (z in 0..100) {
+                        val command =
+                            "${x.toFloat() / 100.0},${y.toFloat() / 100.0},${z.toFloat() / 100.0},0,0,0,0\n"
+                        buffer.add(command)
+
+                        if (!_isGame.value) {
+                            return@launch
+                        }
+                    }
+                }
             }
         }
     }

@@ -36,13 +36,23 @@ class RRobot(
     }
 
     fun connect(ip: String) {
-        robotsContext.addRobot("test", ip, 9105)
-        robot = robotsContext.getRobot("test")
-        robot.connect()
+        val robotName = "test"
+        if (!robotsContext.getRobotsName().contains(robotName)) {
+            robotsContext.addRobot(robotName, ip, 23)
+        }
+        robot = robotsContext.getRobot(robotName)
+        if (!robot.isConnect.value) {
+            robot.connect()
+        }
 
-        clientsContext.addClient("test", ip, 49152)
-        client = clientsContext.getClient("test")
-        client.connect()
+        val clientName = "test"
+        if (!clientsContext.getClientsName().contains(clientName)) {
+            clientsContext.addClient(clientName, ip, 49152)
+        }
+        client = clientsContext.getClient(clientName)
+        if (!client.isConnect.value) {
+            client.connect()
+        }
 
         connectStatusCollect()
     }
