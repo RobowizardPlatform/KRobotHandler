@@ -22,7 +22,7 @@ class Buffer(private val bufferSize: Int) {
         }
     }
 
-    fun calculateMiddle(): String? {
+    private fun calculateMiddle(): String? {
         return if (buffer.size == bufferSize) {
             val points = mutableListOf<Point>()
             val l_buffer = buffer.toMutableList()
