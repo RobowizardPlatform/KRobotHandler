@@ -3,7 +3,6 @@ package handDetector
 import client.Client
 import client.ClientsContext
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -55,16 +54,6 @@ class HandDetector(
 
     fun disconnect() {
         client.disconnect()
-    }
-
-    fun startFlow(
-        onRead: (String) -> Unit
-    ) {
-        coroutineScope.launch(Dispatchers.IO) {
-            client.dataHandler.collect {
-                onRead(it)
-            }
-        }
     }
 
     fun isInit(): Boolean {

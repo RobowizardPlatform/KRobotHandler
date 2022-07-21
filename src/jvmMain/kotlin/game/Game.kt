@@ -3,12 +3,14 @@ package game
 import entity.Buffer
 import handDetector.HandDetector
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import robot.RRobot
+import utils.printInfo
+import utils.printWarning
 
 class Game(
     private val robot: RRobot,
@@ -26,7 +28,9 @@ class Game(
         if (robot.isInit() && handDetector.isInit()) {
             if (!isTrack) {
                 isTrack = true
-                trackHandDetector()
+                coroutineScope.launch {
+                    trackHandDetector()
+                }
             }
             buffer.clear()
 
@@ -38,59 +42,34 @@ class Game(
                 robot.startProgram("moveByHand")
                 delay(1500L)
 
-//                trackHandDetector()
-//            trackData()
                 sendBuffer()
             }
+        } else {
+            printWarning("Robot or hand detector is not init")
         }
     }
 
-    fun sendBuffer() {
-        coroutineScope.launch(Dispatchers.IO) {
-            while (_isGame.value) {
-                val message = buffer.getLast()
-                if (message != null) {
-                    println(message)
-                    robot.send("$message\n")
+    suspend fun sendBuffer() {
+        while (_isGame.value) {
+            val message = buffer.getLast()
+            if (message != null) {
+                printInfo(message)
+                robot.send("$message\n")
+            }
+            delay(1L)
+        }
+    }
+
+    suspend fun trackHandDetector() {
+        if (handDetector.isInit()) {
+            handDetector.client.dataHandler.collect {
+                if (!it.contains("START")) {
+                    buffer.add(it)
                 }
-                delay(1L)
-            }
-//            else {
-//                    stopGame()
-//                }
-//            }
-        }
-    }
 
-    fun trackHandDetector() {
-        handDetector.startFlow {
-//                if (!it.contains("START")) {
-//                    val values = it.split(";").map { it.trim().toFloat() }
-//                    var message = ""
-//                    values.forEach {
-//                        message += "${(it + 1.0) / 2.0},"
-//                    }
-//                    buffer.add("$message,")
-//                }
-            if (!it.contains("START")) {
-                buffer.add(it)
-            }
-        }
-    }
-
-    private fun trackData() {
-        coroutineScope.launch {
-            for (x in 0..100) {
-                for (y in 0..100) {
-                    for (z in 0..100) {
-                        val command =
-                            "${x.toFloat() / 100.0},${y.toFloat() / 100.0},${z.toFloat() / 100.0},0,0,0,0\n"
-                        buffer.add(command)
-
-                        if (!_isGame.value) {
-                            return@launch
-                        }
-                    }
+                if (!isGame.value) {
+                    isTrack = false
+                    return@collect
                 }
             }
         }
