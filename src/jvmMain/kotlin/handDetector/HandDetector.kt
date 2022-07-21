@@ -17,6 +17,8 @@ class HandDetector(
     lateinit var client: Client
     private val _connectStatus = MutableStateFlow(false)
     val connectStatus: StateFlow<Boolean> = _connectStatus
+    val handName = "test2"
+
     private fun connectStatusCollect() {
         coroutineScope.launch {
             if (::client.isInitialized) {
@@ -31,12 +33,20 @@ class HandDetector(
         }
     }
 
-    fun connect(ip: String, port: String) {
-        val handName = "test2"
-        if (!clientsContext.getClientsName().contains(handName)) {
-            clientsContext.addClient("test2", ip, port.trim().toInt())
+    init {
+        if (clientsContext.getClientsName().contains(handName)) {
+            client = clientsContext.getClient(handName)
+            connectStatusCollect()
         }
-        client = clientsContext.getClient("test2")
+
+    }
+
+    fun connect(ip: String, port: String) {
+
+        if (!clientsContext.getClientsName().contains(handName)) {
+            clientsContext.addClient(handName, ip, port.trim().toInt())
+            client = clientsContext.getClient(handName)
+        }
         if (!client.isConnect.value) {
             client.connect()
         }
@@ -55,5 +65,9 @@ class HandDetector(
                 onRead(it)
             }
         }
+    }
+
+    fun isInit(): Boolean {
+        return ::client.isInitialized
     }
 }

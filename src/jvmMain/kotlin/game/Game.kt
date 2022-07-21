@@ -19,32 +19,41 @@ class Game(
     private val _isGame = MutableStateFlow(false)
     val isGame: StateFlow<Boolean> = _isGame
 
-    private val buffer = Buffer(10)
+    private val buffer = Buffer(1)
+    private var isTrack = false
+
     fun startGame() {
-        buffer.clear()
-        _isGame.value = true
+        if (robot.isInit() && handDetector.isInit()) {
+            if (!isTrack) {
+                isTrack = true
+                trackHandDetector()
+            }
+            buffer.clear()
 
-        coroutineScope.launch {
-            robot.signal(gameSignal, true)
-            delay(10L)
-            robot.startProgram("moveByHand")
-            delay(1500L)
+            _isGame.value = true
 
-            trackHandDetector()
+            coroutineScope.launch {
+                robot.signal(gameSignal, true)
+                delay(10L)
+                robot.startProgram("moveByHand")
+                delay(1500L)
+
+//                trackHandDetector()
 //            trackData()
-            sendBuffer()
+                sendBuffer()
+            }
         }
     }
 
     fun sendBuffer() {
         coroutineScope.launch(Dispatchers.IO) {
             while (_isGame.value) {
-                val message = buffer.getMiddle()
+                val message = buffer.getLast()
                 if (message != null) {
                     println(message)
                     robot.send("$message\n")
                 }
-                delay(10L)
+                delay(1L)
             }
 //            else {
 //                    stopGame()
@@ -54,8 +63,7 @@ class Game(
     }
 
     fun trackHandDetector() {
-        coroutineScope.launch {
-            handDetector.startFlow {
+        handDetector.startFlow {
 //                if (!it.contains("START")) {
 //                    val values = it.split(";").map { it.trim().toFloat() }
 //                    var message = ""
@@ -64,9 +72,8 @@ class Game(
 //                    }
 //                    buffer.add("$message,")
 //                }
-                if (!it.contains("START")) {
-                    buffer.add(it)
-                }
+            if (!it.contains("START")) {
+                buffer.add(it)
             }
         }
     }

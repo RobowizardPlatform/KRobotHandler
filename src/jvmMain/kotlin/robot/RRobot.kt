@@ -20,7 +20,8 @@ class RRobot(
     private lateinit var client: Client
     private val _connectStatus = MutableStateFlow(false)
     val connectStatus: StateFlow<Boolean> = _connectStatus
-
+    private val robotName = "test"
+    private val clientName = "test"
     private fun connectStatusCollect() {
         coroutineScope.launch {
             if (::robot.isInitialized) {
@@ -35,25 +36,34 @@ class RRobot(
         }
     }
 
+    init {
+
+        if (robotsContext.getRobotsName().contains(robotName)) {
+            robot = robotsContext.getRobot(robotName)
+            connectStatusCollect()
+        }
+
+        if (clientsContext.getClientsName().contains(clientName)) {
+            client = clientsContext.getClient(clientName)
+        }
+    }
+
     fun connect(ip: String) {
-        val robotName = "test"
         if (!robotsContext.getRobotsName().contains(robotName)) {
             robotsContext.addRobot(robotName, ip, 23)
+            robot = robotsContext.getRobot(robotName)
         }
-        robot = robotsContext.getRobot(robotName)
         if (!robot.isConnect.value) {
             robot.connect()
         }
 
-        val clientName = "test"
         if (!clientsContext.getClientsName().contains(clientName)) {
             clientsContext.addClient(clientName, ip, 49152)
+            client = clientsContext.getClient(clientName)
         }
-        client = clientsContext.getClient(clientName)
         if (!client.isConnect.value) {
             client.connect()
         }
-
         connectStatusCollect()
     }
 
@@ -91,5 +101,9 @@ class RRobot(
 
     fun hold() {
         robot.send("HOLD")
+    }
+
+    fun isInit(): Boolean {
+        return ::robot.isInitialized
     }
 }

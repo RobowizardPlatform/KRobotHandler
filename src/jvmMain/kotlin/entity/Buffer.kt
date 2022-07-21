@@ -9,10 +9,10 @@ class Buffer(private val bufferSize: Int) {
 
     fun add(line: String) {
         buffer.add(line)
-        gripState = line.split(";").last().trim()
-        if (buffer.size > bufferSize) {
-            buffer.removeFirst()
-        }
+//        gripState = line.split(";").last().trim()
+//        if (buffer.size > bufferSize) {
+//            buffer.removeFirst()
+//        }
         middle = calculateMiddle()
     }
 
@@ -39,9 +39,9 @@ class Buffer(private val bufferSize: Int) {
             var fullZ = 0.0
 
             points.forEach {
-                fullX += (it.x.toDouble() + 1) / 2
-                fullY += (it.y.toDouble() + 1) / 2
-                fullZ += (it.z.toDouble() + 1) / 2
+                fullX += ((it.x.toDouble() + 1) / 2) * 1.2
+                fullY += ((it.y.toDouble() + 1) / 2) * 1.2
+                fullZ += ((it.z.toDouble() + 1) / 2) * 1.2
             }
 
             val middlePoint = Point(
@@ -62,9 +62,23 @@ class Buffer(private val bufferSize: Int) {
 
 
     fun getLast(): String? {
-        val first = buffer.first()
-        buffer.removeFirst()
-        return first
+        return if (buffer.size > 0) {
+            val first = buffer.first()
+            buffer.removeFirst()
+
+            if (!first.contains("START")) {
+                val values = first.split(";").map { it.trim().toFloat() }
+                var message = ""
+                values.forEach {
+                    message += "${(it + 1.0) / 2.0},"
+                }
+                "$message,"
+            } else {
+                null
+            }
+        } else {
+            null
+        }
     }
 
     fun clear() {
