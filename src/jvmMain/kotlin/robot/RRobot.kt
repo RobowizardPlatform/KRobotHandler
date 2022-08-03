@@ -14,14 +14,16 @@ import kotlinx.coroutines.flow.collect
 class RRobot(
     private val coroutineScope: CoroutineScope,
     private val robotsContext: RobotsContext,
-    private val clientsContext: ClientsContext
+    private val clientsContext: ClientsContext,
+    private var ipDefault: String = "localhost",
+    private var portDefault: Int = 9105,
+    private var clientPortDefault: Int = 49152
 ) {
     private lateinit var robot: Robot
     private lateinit var client: Client
     private val _connectStatus = MutableStateFlow(false)
     val connectStatus: StateFlow<Boolean> = _connectStatus
-    private val robotName = "test"
-    private val clientName = "test"
+
     private fun connectStatusCollect() {
         coroutineScope.launch {
             if (::robot.isInitialized) {
@@ -37,39 +39,31 @@ class RRobot(
     }
 
     init {
-
-        if (robotsContext.getRobotsName().contains(robotName)) {
-            robot = robotsContext.getRobot(robotName)
+        val _robot = robotsContext.isConnected(ipDefault, portDefault)
+        if (_robot != null) {
+            robot = _robot
             connectStatusCollect()
         }
 
-        if (clientsContext.getClientsName().contains(clientName)) {
-            client = clientsContext.getClient(clientName)
+        val _client = clientsContext.isConnected(ipDefault, clientPortDefault)
+        if (_client != null) {
+            client = _client
         }
     }
 
-    fun connect(ip: String) {
-        if (!robotsContext.getRobotsName().contains(robotName)) {
-            robotsContext.addRobot(robotName, ip, 23)
-            robot = robotsContext.getRobot(robotName)
-        }
-        if (!robot.isConnect.value) {
-            robot.connect()
-        }
+    fun connect(ip: String, robotPort: Int?) {
+        ipDefault = ip
+        portDefault = robotPort ?: 9105
 
-        if (!clientsContext.getClientsName().contains(clientName)) {
-            clientsContext.addClient(clientName, ip, 49152)
-            client = clientsContext.getClient(clientName)
-        }
-        if (!client.isConnect.value) {
-            client.connect()
-        }
+        robot = robotsContext.connect(ipDefault, portDefault)
+        client = clientsContext.connect(ipDefault, clientPortDefault)
+
         connectStatusCollect()
     }
 
     fun disconnect() {
-        robot.disconnect()
-        client.disconnect()
+        clientsContext.disconnect(ipDefault, clientPortDefault)
+        robotsContext.disconnect(ipDefault, portDefault)
     }
 
     fun sendCommand(point: Point, gripState: Boolean) {

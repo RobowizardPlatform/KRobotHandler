@@ -24,7 +24,18 @@ fun RobotSetting(
                 ip.value = it
             },
             label = {
-                Text("Enter IP")
+                Text("IP")
+            }
+        )
+
+        val port = remember { mutableStateOf("23") }
+        OutlinedTextField(
+            value = port.value,
+            onValueChange = {
+                port.value = it
+            },
+            label = {
+                Text("Port")
             }
         )
 
@@ -32,7 +43,7 @@ fun RobotSetting(
         val text = if (!status.value) "Connect" else "DisConnect"
         val onClick = {
             if (!status.value) {
-                robot.connect(ip.value)
+                robot.connect(ip.value, robotPort = port.value.toIntOrNull())
             } else {
                 robot.disconnect()
             }

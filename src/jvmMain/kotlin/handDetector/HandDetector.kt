@@ -11,7 +11,9 @@ import kotlinx.coroutines.launch
 
 class HandDetector(
     private val coroutineScope: CoroutineScope,
-    private val clientsContext: ClientsContext
+    private val clientsContext: ClientsContext,
+    private var ipDefault: String = "localhost",
+    private var portDefault: Int = 9999
 ) {
     lateinit var client: Client
     private val _connectStatus = MutableStateFlow(false)
@@ -33,27 +35,23 @@ class HandDetector(
     }
 
     init {
-        if (clientsContext.getClientsName().contains(handName)) {
-            client = clientsContext.getClient(handName)
+        val _client = clientsContext.isConnected(ipDefault, 9999)
+        if (_client != null) {
+            client = _client
             connectStatusCollect()
         }
-
     }
 
     fun connect(ip: String, port: String) {
+        ipDefault = ip
+        portDefault = port.toIntOrNull() ?: 9999
 
-        if (!clientsContext.getClientsName().contains(handName)) {
-            clientsContext.addClient(handName, ip, port.trim().toInt())
-            client = clientsContext.getClient(handName)
-        }
-        if (!client.isConnect.value) {
-            client.connect()
-        }
+        client = clientsContext.connect(ipDefault, portDefault)
         connectStatusCollect()
     }
 
     fun disconnect() {
-        client.disconnect()
+        clientsContext.disconnect(ipDefault, portDefault)
     }
 
     fun isInit(): Boolean {

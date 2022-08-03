@@ -80,7 +80,7 @@ class Buffer(private val bufferSize: Int) {
                     ""
                 }
             }
-            "$message,$gripState,"
+            "$message$gripState,"
         } else {
             null
         }
@@ -92,13 +92,13 @@ class Buffer(private val bufferSize: Int) {
         currentNanoTime()
         val oldGripState = gripState == "1"
         val newGripState = message.split(";").last().trim() == "1"
-        if (newGripState != oldGripState) {
-            val timeDif = currentNanoTime() - lastTimeUpdate
-            if (timeDif > gripTime) {
-                lastTimeUpdate = currentNanoTime()
-                gripState = if (newGripState) "1" else "0"
-            }
-        }
+//        if (newGripState != oldGripState) {
+        val timeDif = currentNanoTime() - lastTimeUpdate
+//            if (timeDif > gripTime) {
+        lastTimeUpdate = currentNanoTime()
+        gripState = if (newGripState) "1" else "0"
+//            }
+//        }
     }
 
     /**
