@@ -24,7 +24,7 @@ fun HandDetectorSetting(
             "DisConnect"
         }
 
-        val ip = remember { mutableStateOf("localhost") }
+        val ip = remember { mutableStateOf(handDetector.ipDefault) }
         OutlinedTextField(
             value = ip.value,
             onValueChange = {
@@ -35,7 +35,7 @@ fun HandDetectorSetting(
             }
         )
 
-        val port = remember { mutableStateOf("9999") }
+        val port = remember { mutableStateOf(handDetector.portDefault.toString()) }
         OutlinedTextField(
             value = port.value,
             onValueChange = {

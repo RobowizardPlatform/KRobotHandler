@@ -17,7 +17,7 @@ fun RobotSetting(
     ) {
         val status = robot.connectStatus.collectAsState()
 
-        val ip = remember { mutableStateOf("192.168.0.2") }
+        val ip = remember { mutableStateOf(robot.ipDefault) }
         OutlinedTextField(
             value = ip.value,
             onValueChange = {
@@ -28,7 +28,7 @@ fun RobotSetting(
             }
         )
 
-        val port = remember { mutableStateOf("23") }
+        val port = remember { mutableStateOf(robot.portDefault.toString()) }
         OutlinedTextField(
             value = port.value,
             onValueChange = {

@@ -12,13 +12,12 @@ import kotlinx.coroutines.launch
 class HandDetector(
     private val coroutineScope: CoroutineScope,
     private val clientsContext: ClientsContext,
-    private var ipDefault: String = "localhost",
-    private var portDefault: Int = 9999
+    var ipDefault: String = "localhost",
+    var portDefault: Int = 9999,
 ) {
     lateinit var client: Client
     private val _connectStatus = MutableStateFlow(false)
     val connectStatus: StateFlow<Boolean> = _connectStatus
-    val handName = "test2"
 
     private fun connectStatusCollect() {
         coroutineScope.launch {

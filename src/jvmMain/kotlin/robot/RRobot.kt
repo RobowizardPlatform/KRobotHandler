@@ -15,9 +15,9 @@ class RRobot(
     private val coroutineScope: CoroutineScope,
     private val robotsContext: RobotsContext,
     private val clientsContext: ClientsContext,
-    private var ipDefault: String = "localhost",
-    private var portDefault: Int = 9105,
-    private var clientPortDefault: Int = 49152
+    var ipDefault: String = "localhost",
+    var portDefault: Int = 9105,
+    var clientPortDefault: Int = 49152
 ) {
     private lateinit var robot: Robot
     private lateinit var client: Client
