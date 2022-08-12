@@ -71,16 +71,21 @@ class Buffer(private val bufferSize: Int) {
             val first = buffer.first()
             buffer.removeFirst()
 
-            val values = first.split(";").map { it.trim().toFloat() }
-            var message = ""
-            values.forEachIndexed { index, coordinate ->
-                message += if (index != values.lastIndex) {
-                    "${modCoordinate(coordinate)},"
-                } else {
-                    ""
+            if (first.isNotEmpty()) {
+                val values = first.split(";").map { it.trim().toFloat() }
+                var message = ""
+                values.forEachIndexed { index, coordinate ->
+                    message += if (index != values.lastIndex) {
+                        "${modCoordinate(coordinate)},"
+                    } else {
+                        ""
+                    }
                 }
+                "$message$gripState,"
+            } else {
+                null
             }
-            "$message$gripState,"
+
         } else {
             null
         }
